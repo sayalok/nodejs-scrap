@@ -1,0 +1,55 @@
+<%- include('includes/header.ejs') %>
+<link rel="stylesheet" href="/css/scrap.css">
+
+</head>
+<body>
+   <%- include('includes/navigation.ejs') %>
+    <main>
+        
+        <% if (prods.length > 0) { %>
+            <h1>Truck Data List</h1>
+            <p>Total Items <%= totalAdvCount %> </p>
+            <% for (let product of prods) { %>
+
+
+
+
+                <div class="container mt-5 mb-5">
+                    <div class="d-flex justify-content-center row">
+                        <div class="col-md-10">
+                            <div class="row p-2 bg-white border rounded">
+                                <div class="col-md-3 mt-1">
+                                    <img class="img-fluid img-responsive rounded product-image" src="<%= product.imgSrc %>">
+                                </div>
+                                <div class="col-md-6 mt-1">
+                                    <h5><%= product.title %></h5>
+                                </div>
+                                
+                                <div class="align-items-center align-content-center col-md-3 border-left mt-1">
+                                    <div class="d-flex flex-row align-items-center">
+                                        <a href="<%= product.url %>">
+                                            <h4 class="mr-1"><%= product.price %></h4>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="mt-1 mb-1 spec-1">
+                                    <span>
+                                        Original Url<br>
+                                        <%= product.url %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            <% } %>
+        <% } else { %>
+            <h3 class="centered">No Products Found!</h3>
+        <% } %>
+    </main>
+	
+	<script src="/js/index.js"></script>
+<%- include('includes/footer.ejs') %>
