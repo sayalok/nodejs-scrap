@@ -45,7 +45,21 @@
                         </div>
                     </div>
                 </div>
+            <% } %>
 
+            <% if (pageNumber != null) { %>
+                <div class="container mt-5 mb-5 centered">
+                    <nav aria-label="Page navigation example" style="margin: 0px auto; width: 80%;">
+                        <ul class="pagination">
+                            <% for(var i = 0; i < pageNumber; i++) { %>
+                                <li <% if(pageNumber == i) { %> class="page-item active" <% } %>>
+                                    <a class="page-link" href="?page=<%= i + 1 %>"><%= i + 1 %></a>
+                                </li>
+                            <% } %>
+                            
+                        </ul>
+                    </nav>
+                </div>
             <% } %>
         <% } else { %>
             <h3 class="centered">No Products Found!</h3>

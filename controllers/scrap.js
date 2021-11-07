@@ -2,8 +2,13 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const pretty = require("pretty");
 
-exports.addItems  = (req, res, next) => {   
-    const url = "https://www.otomoto.pl/ciezarowe/uzytkowe/mercedes-benz/od-2014/q-actros?search%5Bfilter_enum_damaged%5D=0&search%5Border%5D=created_at%20%3Adesc";
+exports.addItems  = (req, res, next) => {
+    const pageNo = req.query.page;
+    let url = "https://www.otomoto.pl/ciezarowe/uzytkowe/mercedes-benz/od-2014/q-actros?search%5Bfilter_enum_damaged%5D=0&search%5Border%5D=created_at%20%3Adesc";
+    if (pageNo != undefined) {
+        url = `https://www.otomoto.pl/ciezarowe/uzytkowe/mercedes-benz/od-2014/q-actros?search%5Bfilter_enum_damaged%5D=0&search%5Border%5D=created_at%20%3Adesc&page=${pageNo}`;
+    }
+
     getScrapData(url)
         .then($ => {
             const trucksData = [];
@@ -16,17 +21,18 @@ exports.addItems  = (req, res, next) => {
                 truckData.price     = $(el).children(".optimus-app-n2xmvo-Text").children('.optimus-app-epvm6').text()
                 truckData.url       = $(el).children(".optimus-app-1nvnpye").children('.optimus-app-1mgjl0z-Text').children().attr('href')
                 truckData.imgSrc    = $(el).children(".optimus-app-8cec5f").children('.optimus-app-194f7i3').children().attr('src')
-
                
                 trucksData.push(truckData);
             });
 
-            // console.log(trucksData.length);
+            let totalPaginationItem = $('.optimus-app-wak9h6', '.pagination-list').last().text()
+
             res.render('truuckList', {
                 path: '/scrapTruckItem',
                 pageTitle: 'Truck Item',
                 prods: trucksData,
-                totalAdvCount: trucksData.length
+                totalAdvCount: trucksData.length,
+                pageNumber: totalPaginationItem
             });
         })
         .catch(error => {
@@ -34,6 +40,7 @@ exports.addItems  = (req, res, next) => {
                 path: '/scrapTruckItem',
                 pageTitle: 'Truck Item',
                 prods: [],
+                pageNumber: null
             });
         })
 }
@@ -70,13 +77,6 @@ exports.getSingleDetails = (req, res, next) => {
                     truckData.registration_date = registration_date.trim();
                 }               
             });
-
-            // let imgSrcList = $('.slick-active')
-            // console.log(imgSrcList.html());
-            // imgSrcList.each((index,element) => {
-            //     // console.log($(element).children(".slick-slide").children())
-            //     console.log(element);
-            // })
 
             res.render('single-truck-details', {
                 path: '/scrapTruckItem',
