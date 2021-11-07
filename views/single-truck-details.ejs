@@ -1,0 +1,19 @@
+<%- include('includes/header.ejs') %>
+    </head>
+
+    <body>
+        <%- include('includes/navigation.ejs') %>
+        <main class="centered">
+            <h1><%= product.title %></h1>
+            <hr>
+            <!-- <div class="image">
+                <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+            </div> -->
+            <h2><%= product.price %></h2>
+            <p class="mb-1">ID: <%= product.id %></p>
+            <p class="mb-1">Milage: <%= product.milage %></p>
+            <p class="mb-1">Power: <%= product.power %></p>
+            <p class="mb-1">Production Date: <%= product.production_date %></p>
+            <p class="mb-1">Registration Date: <%= product.registration_date %></p>
+        </main>
+<%- include('includes/footer.ejs') %>

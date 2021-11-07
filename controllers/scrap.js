@@ -38,6 +38,65 @@ exports.addItems  = (req, res, next) => {
         })
 }
 
+exports.getSingleDetails = (req, res, next) => {
+    const prodUrl = req.body.product_base_url;
+    getScrapData(prodUrl)
+        .then($ => {
+           
+            const truckData = {};
+
+            let title = $('.offer-title', '.offer-summary').text();
+            let price = $('.offer-price__number', '.price-wrapper').text()
+
+
+            truckData.id    = $('#ad_id', '.offer-meta').text()
+            truckData.title = title.trim()
+            truckData.price = price.trim()
+
+            let offerParam = $('.offer-params__item', '.offer-params__list')
+            offerParam.each((idx, el) => {
+                let label = $(el).children(".offer-params__label").text();
+                if (label === 'Przebieg') {
+                    let milage = $(el).children(".offer-params__value").text()
+                    truckData.milage = milage.trim();
+                }else if(label === 'Moc') {
+                    let power = $(el).children(".offer-params__value").text()
+                    truckData.power = power.trim();
+                }else if(label === 'Rok produkcji') {
+                    let production_date = $(el).children(".offer-params__value").text()
+                    truckData.production_date = production_date.trim();
+                }else if(label === 'Pierwsza rejestracja') {
+                    let registration_date = $(el).children(".offer-params__value").text()
+                    truckData.registration_date = registration_date.trim();
+                }               
+            });
+
+            // let imgSrcList = $('.slick-active')
+            // console.log(imgSrcList.html());
+            // imgSrcList.each((index,element) => {
+            //     // console.log($(element).children(".slick-slide").children())
+            //     console.log(element);
+            // })
+
+            res.render('single-truck-details', {
+                path: '/scrapTruckItem',
+                pageTitle: 'Single Truck Item',
+                product: truckData,
+            });
+        })
+        .catch(error => {
+            res.render('single-truck-details', {
+                path: '/scrapTruckItem',
+                pageTitle: 'Truck Item',
+                product: [],
+            });
+        })
+};
+
+exports.scrapeTruckItem = () => {
+
+}
+
 
 const getScrapData = async (url) => {
     const { data } = await axios.get(url);
