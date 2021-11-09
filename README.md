@@ -16,7 +16,7 @@ A. Scrap from remote link
   1. /advertisement?page=1
  
 B. Advertisement routes
-  1. advertisementList/  [GET Advertisements]
+  1. advertisementList/  [GET Advertisements List]
   2. :productId [ GET single Advertisements]
 
 
