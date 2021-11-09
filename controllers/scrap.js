@@ -1,6 +1,8 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const pretty = require("pretty");
+// const pretty = require("pretty");
+const Advertisement  = require('../models/advertisement');
+
 
 exports.addItems  = (req, res, next) => {
     const pageNo = req.query.page;
@@ -11,43 +13,35 @@ exports.addItems  = (req, res, next) => {
 
     getScrapData(url)
         .then($ => {
-            const trucksData = [];
-            const listItems = $('.optimus-app-10uqxf9')
-            listItems.each((idx, el) => {
-                const truckData = {};
-
-                truckData.id        = $(el).attr('id');
-                truckData.title     = $(el).children(".optimus-app-1nvnpye").children('.optimus-app-1mgjl0z-Text').text()
-                truckData.price     = $(el).children(".optimus-app-n2xmvo-Text").children('.optimus-app-epvm6').text()
-                truckData.url       = $(el).children(".optimus-app-1nvnpye").children('.optimus-app-1mgjl0z-Text').children().attr('href')
-                truckData.imgSrc    = $(el).children(".optimus-app-8cec5f").children('.optimus-app-194f7i3').children().attr('src')
-               
-                trucksData.push(truckData);
-            });
-
             let totalPaginationItem = $('.optimus-app-wak9h6', '.pagination-list').last().text()
-
-            res.render('truuckList', {
-                path: '/scrapTruckItem',
-                pageTitle: 'Truck Item',
-                prods: trucksData,
-                totalAdvCount: trucksData.length,
-                pageNumber: totalPaginationItem
+            const listItems = $('.optimus-app-10uqxf9')
+            let itemLooping = listItems.map((idx, el) => {
+                let productDetailsUrl = $(el).children(".optimus-app-1nvnpye").children('.optimus-app-1mgjl0z-Text').children().attr('href')
+                return getAdvertisementDetailsBYUrl(productDetailsUrl)
+                    .then(result => {
+                        const adv = new Advertisement(result)
+                        adv.save()
+                    })
+                    .catch(error => {
+                        res.status(500).json({error:err})
+                    })
             });
+
+            Promise.all(itemLooping).then( result =>  {
+                res.status(201).json({message: "Successfully"})
+            })
+            .catch(error => {
+                res.status(500).json({error:err})
+            })
+         
         })
         .catch(error => {
-            res.render('truuckList', {
-                path: '/scrapTruckItem',
-                pageTitle: 'Truck Item',
-                prods: [],
-                pageNumber: null
-            });
+            res.status(500).json({error:err})
         })
 }
 
-exports.getSingleDetails = (req, res, next) => {
-    const prodUrl = req.body.product_base_url;
-    getScrapData(prodUrl)
+const getAdvertisementDetailsBYUrl = async (prodUrl) => {
+    return await getScrapData(prodUrl)
         .then($ => {
            
             const truckData = {};
@@ -55,10 +49,10 @@ exports.getSingleDetails = (req, res, next) => {
             let title = $('.offer-title', '.offer-summary').text();
             let price = $('.offer-price__number', '.price-wrapper').text()
 
-
-            truckData.id    = $('#ad_id', '.offer-meta').text()
+            truckData.product_id    = $('#ad_id', '.offer-meta').text()
             truckData.title = title.trim()
             truckData.price = price.trim()
+            truckData.url = prodUrl
 
             let offerParam = $('.offer-params__item', '.offer-params__list')
             offerParam.each((idx, el) => {
@@ -74,29 +68,18 @@ exports.getSingleDetails = (req, res, next) => {
                     truckData.production_date = production_date.trim();
                 }else if(label === 'Pierwsza rejestracja') {
                     let registration_date = $(el).children(".offer-params__value").text()
-                    truckData.registration_date = registration_date.trim();
+                    registration_date = new Date(registration_date)
+                    if (registration_date != 'Invalid Date') {
+                        truckData.registration_date = registration_date;
+                    }
                 }               
             });
-
-            res.render('single-truck-details', {
-                path: '/scrapTruckItem',
-                pageTitle: 'Single Truck Item',
-                product: truckData,
-            });
+            return truckData;           
         })
         .catch(error => {
-            res.render('single-truck-details', {
-                path: '/scrapTruckItem',
-                pageTitle: 'Truck Item',
-                product: [],
-            });
+            return false
         })
-};
-
-exports.scrapeTruckItem = () => {
-
 }
-
 
 const getScrapData = async (url) => {
     const { data } = await axios.get(url);
