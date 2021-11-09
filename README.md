@@ -10,9 +10,9 @@ This is a simple node js application to scrap data from  `otomoto.pl`
 it will open at [http://localhost:3001](http://localhost:3001)
 
 
-# Api list
+Api list
 
-A. Scrap 
+A. Scrap from remote link 
   1. /advertisement?page=1
  
 B. Advertisement routes
