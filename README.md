@@ -1,10 +1,10 @@
-# node Js Scrap Project
+# Node Js Scrap Project
 This is a simple node js application to scrap data from  `otomoto.pl`
 
 ## To run this app do the following step:
 
 1. npm install
-2. npm start
+2. nodemon start
 
 
 it will open at [http://localhost:3001](http://localhost:3001)
