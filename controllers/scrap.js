@@ -1,10 +1,9 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-// const pretty = require("pretty");
 const Advertisement  = require('../models/advertisement');
 
-
-exports.addItems  = (req, res, next) => {
+// Api
+exports.addItems = (req, res, next) => {
     const pageNo = req.query.page;
     let url = "https://www.otomoto.pl/ciezarowe/uzytkowe/mercedes-benz/od-2014/q-actros?search%5Bfilter_enum_damaged%5D=0&search%5Border%5D=created_at%20%3Adesc";
     if (pageNo != undefined) {
@@ -80,6 +79,125 @@ const getAdvertisementDetailsBYUrl = async (prodUrl) => {
             return false
         })
 }
+
+exports.getAllAdvertisementApi = (req,res,next) => {   
+    getAdvList()
+        .then(data => {
+            let i = 0;
+            const result = {
+                message: "Product List",
+                count: data.length,
+                advertisement: data.map(d => {
+                    i++
+                    return {
+                        // id: i,
+                        _id: d._id,
+                        adv_id: d.product_id,
+                        title: d.title,
+                        price: d.price,
+                        orgininal_url: d.orgininal_url,
+                        milage: d.milage,
+                        power: d.power,
+                        production_date: d.production_date,
+                        production_date: d.url,
+                        registration_date: d.registration_date,
+                        request: {
+                            Method: "GET",
+                            url: "http://localhost:3001/"+d._id
+                        }
+                    }
+                })
+            }
+            res.status(200).json({result})
+
+        })
+        .catch(error => {
+            res.status(500).json({error:err})
+        })
+}
+
+exports.advertisement_get_byidApi = (req, res, next) => {
+    let id = req.params.productId
+    getSingleAdvById(id)
+        .then(d => {
+            if(d) {
+                res.status(200).json({
+                    message: "Get Single Product",
+                    advertisement: {
+                        _id: d._id,
+                        adv_id: d.product_id,
+                        title: d.title,
+                        price: d.price,
+                        orgininal_url: d.orgininal_url,
+                        milage: d.milage,
+                        power: d.power,
+                        production_date: d.production_date,
+                        production_date: d.url,
+                        registration_date: d.registration_date,
+                        request: {
+                            Method: "GET",
+                            url: "http://localhost:3001/"+d._id
+                        }
+                    }
+                })
+            }else{
+                res.status(404).json({message: "Invalid Product Id"})
+            }
+        })
+        .catch(err => {
+            res.status(500).json({error:err})
+        })
+}
+
+// web view
+exports.getAllAdvertisementList = (req, res, next) => {
+    getAdvList()
+        .then(result => {
+            console.log(result);
+            res.render('advList', {
+                path: '/advertisements',
+                pageTitle: 'Advertisement Item',
+                prods: result,
+            });
+        })
+        .catch(error => {
+            res.render('advList', {
+                path: '/advertisements',
+                pageTitle: 'Advertisement Item',
+                prods: [],
+            });
+        })
+};
+
+exports.getSingleAdvertisement = (req, res, next) => {
+    let id = req.params.productId
+    getSingleAdvById(id)
+        .then(result => {
+            res.render('single-adv-details', {
+                path: '/scrapTruckItem',
+                pageTitle: 'Advertisement Item',
+                product: result,
+            });
+        })
+        .catch(error => {
+            res.render('single-adv-details', {
+                path: '/scrapTruckItem',
+                pageTitle: 'Advertisement Item',
+                product: [],
+            });
+        })
+}
+
+
+//helper
+const getAdvList = () => {
+    return Advertisement.find().exec()
+};
+
+const getSingleAdvById = (id) => {
+    return  Advertisement.findById(id).exec()
+}
+
 
 const getScrapData = async (url) => {
     const { data } = await axios.get(url);
