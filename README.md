@@ -1,5 +1,5 @@
 # Node Js Scrap Project
-This is a simple node js application to scrap data from  `otomoto.pl` website
+This is a simple node js application to scrap data from  `otomoto.pl` website.
 
 ## To run this app do the following step:
 
